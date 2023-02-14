@@ -82,4 +82,16 @@ dependencies {
 
     // Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:2.3.0"
+
+    // CameraX
+    def camerax_version = "1.0.1"
+    implementation "androidx.camera:camera-camera2:$camerax_version"
+    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+    implementation "androidx.camera:camera-view:1.0.0-alpha27"
+
+    // Icons
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
+    // Coil
+    implementation "io.coil-kt:coil-compose:1.4.0"
 }

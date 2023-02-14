@@ -1,27 +1,41 @@
 package com.example.fotofun
 
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.fotofun.ui.add_edit_course.AddEditCourseScreen
 import com.example.fotofun.ui.add_edit_course_with_student_view.AddEditCourseWithStudentScreen
 import com.example.fotofun.ui.add_edit_grade.AddEditGradeScreen
 import com.example.fotofun.ui.add_edit_student.AddEditStudentScreen
+import com.example.fotofun.ui.camera_view.CameraView
 import com.example.fotofun.ui.clear_db_view.ClearDBScreen
 import com.example.fotofun.ui.course_with_student_view.CourseWithStudentListScreen
 import com.example.fotofun.ui.courses_view.CoursesListScreen
@@ -34,9 +48,72 @@ import com.example.fotofun.ui.theme.AssistantAppTheme
 import com.example.fotofun.util.Routes
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var outputDirectory: File
+    private lateinit var cameraExecutor: ExecutorService
+
+    private var shouldShowCamera: MutableState<Boolean> = mutableStateOf(false)
+
+    // region REQUEST PERMISSION LAUNCHER
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if(isGranted) {
+            Log.i("kilo", "Permission granted")
+            shouldShowCamera.value = true
+        } else {
+            Log.i("kilo", "Permission denied")
+        }
+    }
+
+    private fun requestCameraPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                Log.i("kilo", "Permission previously granted")
+                shouldShowCamera.value = true
+            }
+
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                android.Manifest.permission.CAMERA
+            ) -> {
+                Log.i("kilo", "Show camera permissions dialog")
+                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            }
+
+            else -> requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun handleImageCapture(uri: Uri) {
+        Log.i("kilo", "Image captured: $uri")
+        shouldShowCamera.value = false
+    }
+
+    private fun getOutputDirectory(): File {
+        val mediaDir = externalMediaDirs.firstOrNull()?.let {
+            File(it, resources.getString(R.string.app_name)).apply { mkdir() }
+        }
+
+        return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraExecutor.shutdown()
+    }
+
+    // endregion
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -107,9 +184,40 @@ class MainActivity : ComponentActivity() {
                     Box {
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.COURSES_LIST,
+                            startDestination = Routes.CAMERA_VIEW,
                             ) {
 
+
+                            // region WIDOK KAMERY
+                            composable(route = Routes.CAMERA_VIEW) {
+                                if(shouldShowCamera.value) {
+                                    CameraView(
+                                        onNavigate = {
+                                            navController.navigate(it.route)
+                                        },
+                                        outputDirectory = outputDirectory,
+                                        executor = cameraExecutor,
+                                        onImageCaptured = ::handleImageCapture,
+                                        onError = { Log.e("kilo", "View error:", it) }
+                                    )
+                                }
+                                else {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize(),
+                                    ) {
+                                        Text(
+                                            text = "Nie udzielono pozwolenia na wykorzystanie kamery",
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+                                            textAlign = TextAlign.Center,
+                                            fontSize = 40.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            // endregion
 
                             //region Student
 
@@ -288,5 +396,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        requestCameraPermission()
+
+        outputDirectory = getOutputDirectory()
+        cameraExecutor = Executors.newSingleThreadExecutor()
     }
 }
