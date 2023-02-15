@@ -34,6 +34,44 @@ class CameraViewModel @Inject constructor(
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    fun onEvent(event: CameraViewEvent) {
+        when(event) {
+            is CameraViewEvent.OnTakePhoto -> {
+                takePhoto(event.filenameFormat, event.imageCapture, event.outputDirectory, event.executor, event.onImageCaptured, event.onError)
+            }
+//            is CoursesListEvent.OnEditCourseClick -> {
+//                sendUiEvent(UiEvent.Navigate(Routes.COURSE_ADD_EDIT + "?courseId=${event.course.courseId}"))
+//            }
+//            is CoursesListEvent.OnAddCourseClick -> {
+//                sendUiEvent(UiEvent.Navigate(Routes.COURSE_ADD_EDIT))
+//            }
+//            is CoursesListEvent.OnUndoDeleteClick -> {
+//                deletedCourse?.let { course ->
+//                    viewModelScope.launch {
+//                        repository.addCourse(course)
+//                    }
+//                }
+//            }
+//            is CoursesListEvent.OnDeleteCourseClick -> {
+//                viewModelScope.launch {
+//                    deletedCourse = event.course
+//                    repository.deleteCourse(event.course)
+//                    sendUiEvent(
+//                        UiEvent.ShowSnackbar(
+//                        message = "Przedmiot usunięty",
+//                        action = "Cofnij"
+//                    ))
+//                }
+//            }
+        }
+    }
+
+    private fun sendUiEvent(event: UiEvent) {
+        viewModelScope.launch {
+            _uiEvent.send(event)
+        }
+    }
+
     fun takePhoto(
         filenameFormat: String,
         imageCapture: ImageCapture,
@@ -71,41 +109,4 @@ class CameraViewModel @Inject constructor(
 //        }
 //    }
 
-    fun onEvent(event: CameraViewEvent) {
-        when(event) {
-//            is CameraViewEvent.OnTakePhoto -> {
-//                takePhoto(event.)
-//            }
-//            is CoursesListEvent.OnEditCourseClick -> {
-//                sendUiEvent(UiEvent.Navigate(Routes.COURSE_ADD_EDIT + "?courseId=${event.course.courseId}"))
-//            }
-//            is CoursesListEvent.OnAddCourseClick -> {
-//                sendUiEvent(UiEvent.Navigate(Routes.COURSE_ADD_EDIT))
-//            }
-//            is CoursesListEvent.OnUndoDeleteClick -> {
-//                deletedCourse?.let { course ->
-//                    viewModelScope.launch {
-//                        repository.addCourse(course)
-//                    }
-//                }
-//            }
-//            is CoursesListEvent.OnDeleteCourseClick -> {
-//                viewModelScope.launch {
-//                    deletedCourse = event.course
-//                    repository.deleteCourse(event.course)
-//                    sendUiEvent(
-//                        UiEvent.ShowSnackbar(
-//                        message = "Przedmiot usunięty",
-//                        action = "Cofnij"
-//                    ))
-//                }
-//            }
-        }
-    }
-
-    private fun sendUiEvent(event: UiEvent) {
-        viewModelScope.launch {
-            _uiEvent.send(event)
-        }
-    }
 }

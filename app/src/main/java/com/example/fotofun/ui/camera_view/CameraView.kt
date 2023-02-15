@@ -82,13 +82,14 @@ fun CameraView(
             modifier = Modifier.padding(bottom = 20.dp),
             onClick = {
                 Log.i("kilo", "ON CLICK")
-                viewModel.takePhoto(
+                viewModel.onEvent(CameraViewEvent.OnTakePhoto(
                     filenameFormat = "dd-MM-yyyy-HH-mm-ss-SSS",
                     imageCapture = imageCapture,
                     outputDirectory = outputDirectory,
                     executor = executor,
                     onImageCaptured = onImageCaptured,
                     onError = onError
+                )
                 )
             },
             content = {

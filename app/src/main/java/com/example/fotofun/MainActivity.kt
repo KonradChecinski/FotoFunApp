@@ -3,6 +3,8 @@ package com.example.fotofun
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,7 +17,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -30,7 +31,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
 import com.example.fotofun.ui.add_edit_course.AddEditCourseScreen
 import com.example.fotofun.ui.add_edit_course_with_student_view.AddEditCourseWithStudentScreen
 import com.example.fotofun.ui.add_edit_grade.AddEditGradeScreen
@@ -47,11 +47,14 @@ import com.example.fotofun.ui.students_view.StudentsListScreen
 import com.example.fotofun.ui.theme.AssistantAppTheme
 import com.example.fotofun.util.Routes
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -60,6 +63,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var cameraExecutor: ExecutorService
 
     private var shouldShowCamera: MutableState<Boolean> = mutableStateOf(false)
+
+    private lateinit var photoUri: Uri
+    private var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
 
     // region REQUEST PERMISSION LAUNCHER
     private val requestPermissionLauncher = registerForActivityResult(
@@ -97,9 +103,32 @@ class MainActivity : ComponentActivity() {
 
     private fun handleImageCapture(uri: Uri) {
         Log.i("kilo", "Image captured: $uri")
-        shouldShowCamera.value = false
+//        shouldShowCamera.value = false
+
+        photoUri = uri
+        shouldShowPhoto.value = true
+
+        Handler(Looper.getMainLooper()).postDelayed(
+            {
+                shouldShowPhoto.value = false
+
+//                runBlocking {
+//                    doSomething(10)
+//                }
+
+            },
+            3000
+        )
     }
 
+    suspend fun doSomething(index: Int) = coroutineScope {
+        launch {
+        for (i in 0..index) {
+            Log.i("tag", "This'll run 300 milliseconds later")
+            delay(1000)
+        }
+    }
+    }
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
             File(it, resources.getString(R.string.app_name)).apply { mkdir() }
@@ -214,6 +243,16 @@ class MainActivity : ComponentActivity() {
                                             fontSize = 40.sp
                                         )
                                     }
+                                }
+
+                                if (shouldShowPhoto.value) {
+                                    Image(
+                                        painter = rememberImagePainter(photoUri),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(20.dp)
+                                    )
                                 }
                             }
 

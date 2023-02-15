@@ -7,13 +7,13 @@ import java.io.File
 import java.util.concurrent.Executor
 
 sealed class CameraViewEvent {
-    class OnTakePhoto(
-        filenameFormat: String,
-        imageCapture: ImageCapture,
-        outputDirectory: File,
-        executor: Executor,
-        onImageCaptured: (Uri) -> Unit,
-        onError: (ImageCaptureException) -> Unit
+    data class OnTakePhoto(
+        val filenameFormat: String,
+        val imageCapture: ImageCapture,
+        val outputDirectory: File,
+        val executor: Executor,
+        val onImageCaptured: (Uri) -> Unit,
+        val onError: (ImageCaptureException) -> Unit
 
     ): CameraViewEvent()
 }
