@@ -107,16 +107,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
-//    suspend fun doSomething(index: Int) = coroutineScope {
-//        launch {
-//        for (i in 0..index) {
-//            Log.i("tag", "This'll run 300 milliseconds later")
-//            delay(1000)
-//        }
-//    }
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()

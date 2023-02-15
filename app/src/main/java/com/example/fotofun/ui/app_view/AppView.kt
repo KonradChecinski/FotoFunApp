@@ -1,5 +1,7 @@
 package com.example.fotofun.ui.app_view
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,11 +28,12 @@ import com.example.fotofun.ui.camera_view.CameraView
 import com.example.fotofun.ui.camera_view.CameraViewModel
 import com.example.fotofun.util.UiEvent
 import java.io.File
+import java.io.FileDescriptor
+import java.io.IOException
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 
-private lateinit var photoUri: Uri
-private var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
+
 
 @Composable
 fun AppView(
@@ -40,12 +44,11 @@ fun AppView(
     shouldShowCamera: MutableState<Boolean>,
     outputDirectory: File
 ) {
-
     if(shouldShowCamera.value) {
         CameraView(
             outputDirectory = outputDirectory,
             executor = cameraExecutor,
-            onImageCaptured = ::handleImageCapture,
+            onImageCaptured = viewModel::handleImageCapture,
             onError = { Log.e("kilo", "View error:", it) }
         )
     }
@@ -64,9 +67,9 @@ fun AppView(
         }
     }
 
-    if (shouldShowPhoto.value) {
+    if (viewModel.shouldShowPhoto.value) {
         Image(
-            painter = rememberImagePainter(photoUri),
+            painter = rememberImagePainter(viewModel.photoUri),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
@@ -75,22 +78,13 @@ fun AppView(
     }
 }
 
-private fun handleImageCapture(uri: Uri) {
-    Log.i("kilo", "Image captured: $uri")
-//        shouldShowCamera.value = false
+@Composable
+private fun uriToBitmap(selectedFileUri: Uri): Bitmap? {
+    val parcelFileDescriptor = LocalContext.current.contentResolver.openFileDescriptor(selectedFileUri, "r")
+    val fileDescriptor: FileDescriptor = parcelFileDescriptor!!.fileDescriptor
+    val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+    parcelFileDescriptor.close()
+    return image
 
-    photoUri = uri
-    shouldShowPhoto.value = true
-
-    Handler(Looper.getMainLooper()).postDelayed(
-        {
-            shouldShowPhoto.value = false
-
-//                runBlocking {
-//                    doSomething(10)
-//                }
-
-        },
-        3000
-    )
+    return null
 }
