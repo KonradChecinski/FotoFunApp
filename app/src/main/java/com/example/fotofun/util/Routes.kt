@@ -4,6 +4,10 @@ object Routes {
     const val TODO_LIST = "todo_list"
     const val ADD_EDIT_TODO = "add_edit_todo"
 
+    // App View
+    const val APP_VIEW = "app_view"
+
+
     // Camera View
     const val CAMERA_VIEW = "camera_view"
 

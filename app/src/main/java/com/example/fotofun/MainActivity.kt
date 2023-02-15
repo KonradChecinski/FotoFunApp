@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.system.Os
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,7 +36,7 @@ import com.example.fotofun.ui.add_edit_course.AddEditCourseScreen
 import com.example.fotofun.ui.add_edit_course_with_student_view.AddEditCourseWithStudentScreen
 import com.example.fotofun.ui.add_edit_grade.AddEditGradeScreen
 import com.example.fotofun.ui.add_edit_student.AddEditStudentScreen
-import com.example.fotofun.ui.camera_view.CameraView
+import com.example.fotofun.ui.app_view.AppView
 import com.example.fotofun.ui.clear_db_view.ClearDBScreen
 import com.example.fotofun.ui.course_with_student_view.CourseWithStudentListScreen
 import com.example.fotofun.ui.courses_view.CoursesListScreen
@@ -59,13 +60,10 @@ import java.util.concurrent.Executors
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
-
     private var shouldShowCamera: MutableState<Boolean> = mutableStateOf(false)
+    private lateinit var outputDirectory: File
 
-    private lateinit var photoUri: Uri
-    private var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
 
     // region REQUEST PERMISSION LAUNCHER
     private val requestPermissionLauncher = registerForActivityResult(
@@ -78,7 +76,6 @@ class MainActivity : ComponentActivity() {
             Log.i("kilo", "Permission denied")
         }
     }
-
     private fun requestCameraPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -101,41 +98,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleImageCapture(uri: Uri) {
-        Log.i("kilo", "Image captured: $uri")
-//        shouldShowCamera.value = false
-
-        photoUri = uri
-        shouldShowPhoto.value = true
-
-        Handler(Looper.getMainLooper()).postDelayed(
-            {
-                shouldShowPhoto.value = false
-
-//                runBlocking {
-//                    doSomething(10)
-//                }
-
-            },
-            3000
-        )
-    }
-
-    suspend fun doSomething(index: Int) = coroutineScope {
-        launch {
-        for (i in 0..index) {
-            Log.i("tag", "This'll run 300 milliseconds later")
-            delay(1000)
-        }
-    }
-    }
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdir() }
+            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
         }
 
         return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
+
+
+
+//    suspend fun doSomething(index: Int) = coroutineScope {
+//        launch {
+//        for (i in 0..index) {
+//            Log.i("tag", "This'll run 300 milliseconds later")
+//            delay(1000)
+//        }
+//    }
+//    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -213,47 +193,20 @@ class MainActivity : ComponentActivity() {
                     Box {
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.CAMERA_VIEW,
+                            startDestination = Routes.APP_VIEW,
                             ) {
 
 
-                            // region WIDOK KAMERY
-                            composable(route = Routes.CAMERA_VIEW) {
-                                if(shouldShowCamera.value) {
-                                    CameraView(
-                                        onNavigate = {
-                                            navController.navigate(it.route)
-                                        },
-                                        outputDirectory = outputDirectory,
-                                        executor = cameraExecutor,
-                                        onImageCaptured = ::handleImageCapture,
-                                        onError = { Log.e("kilo", "View error:", it) }
-                                    )
-                                }
-                                else {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                    ) {
-                                        Text(
-                                            text = "Nie udzielono pozwolenia na wykorzystanie kamery",
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(0.dp, 0.dp, 0.dp, 10.dp),
-                                            textAlign = TextAlign.Center,
-                                            fontSize = 40.sp
-                                        )
-                                    }
-                                }
-
-                                if (shouldShowPhoto.value) {
-                                    Image(
-                                        painter = rememberImagePainter(photoUri),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(20.dp)
-                                    )
-                                }
+                            // region WIDOK GŁÓWNY APLIKACJI
+                            composable(route = Routes.APP_VIEW) {
+                                AppView(
+                                    onNavigate = {
+                                        navController.navigate(it.route)
+                                    },
+                                    cameraExecutor = cameraExecutor,
+                                    shouldShowCamera = shouldShowCamera,
+                                    outputDirectory = outputDirectory
+                                )
                             }
 
                             // endregion
@@ -437,8 +390,7 @@ class MainActivity : ComponentActivity() {
         }
 
         requestCameraPermission()
-
-        outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
+        outputDirectory = getOutputDirectory()
     }
 }

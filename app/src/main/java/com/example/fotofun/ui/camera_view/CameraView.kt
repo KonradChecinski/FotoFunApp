@@ -39,7 +39,6 @@ import kotlin.coroutines.suspendCoroutine
 
 @Composable
 fun CameraView(
-    onNavigate: (UiEvent.Navigate) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CameraViewModel = hiltViewModel(),
 
