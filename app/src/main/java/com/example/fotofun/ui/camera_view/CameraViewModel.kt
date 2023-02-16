@@ -10,9 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.data.AssistantRepository
-import com.example.fotofun.data.entities.Course
-import com.example.fotofun.ui.courses_view.CoursesListEvent
-import com.example.fotofun.util.Routes
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

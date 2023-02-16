@@ -18,7 +18,7 @@ fun DrawerHeader() {
             .padding(10.dp, 30.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = "Asystent Nauczyciela", fontSize = 50.sp)
+        Text(text = "FotoFun", fontSize = 60.sp)
     }
 }
 
