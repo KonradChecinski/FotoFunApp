@@ -7,6 +7,10 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.util.Rational
+import android.util.Size
+import android.view.Surface
+import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -44,12 +48,13 @@ class AppViewModel @Inject constructor(
 
 
     // SETUP
-    val lensFacing = CameraSelector.LENS_FACING_FRONT
+    val lensFacing = CameraSelector.LENS_FACING_BACK
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
 
-    val preview = Preview.Builder().build()
+    var preview = Preview.Builder().setTargetAspectRatio(RATIO_4_3).build()
+
 
     fun onEvent(event: AppViewEvent) {
         when(event) {
@@ -164,4 +169,6 @@ class AppViewModel @Inject constructor(
 
         return null
     }
+
+
 }

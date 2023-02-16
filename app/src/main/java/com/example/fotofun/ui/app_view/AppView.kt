@@ -9,9 +9,12 @@ import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.system.Os.mkdir
 import android.util.Log
+import android.util.Rational
+import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
+import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
@@ -60,12 +63,18 @@ fun AppView(
     shouldShowCamera: MutableState<Boolean>,
     outputDirectory: File
 ) {
+
+
+
+
+
     // SETUP
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val previewView = remember { PreviewView(context) }
-    val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
+    val ratio = Rational(4,3)
+    val imageCapture: ImageCapture = remember { ImageCapture.Builder().setTargetAspectRatio(RATIO_4_3).build() }
 
 
     // 2
@@ -161,3 +170,4 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider = suspend
         }, ContextCompat.getMainExecutor(this))
     }
 }
+
