@@ -115,21 +115,7 @@ class MainActivity : ComponentActivity() {
                     drawerContent = {
                         DrawerHeader()
                         DrawerBody(
-                            items = listOf(
-//                                MenuItem(
-//                                    id = "zajecia",
-//                                    title = "Zajęcia",
-//                                    contentDescription = "Pokaż widok zajęć",
-//                                    icon = ImageVector.vectorResource(id = R.drawable.school),
-//                                    route = Routes.COURSES_LIST
-//                                ),
-                            ),
-                            onItemClick = {
-//                               navController.navigate(it.route)
-//                                scope.launch {
-//                                    scaffoldState.drawerState.close()
-//                                }
-                            }
+
                         )
                         Spacer(modifier = Modifier.height(50.dp))
                     }

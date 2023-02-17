@@ -5,8 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 
@@ -24,32 +30,74 @@ fun DrawerHeader() {
 
 @Composable
 fun DrawerBody(
-    items: List<MenuItem>,
+    modifier: Modifier = Modifier
+) {
+
+    val suggestionsHowManyPhotos = listOf("5", "6")
+    val suggestionsDelay = listOf("1", "2", "3", "4", "5")
+    val suggestionsBanner = listOf("baner1", "baner2", "baner3", "baner4")
+
+
+    Dropdown(suggestions = suggestionsHowManyPhotos, labelParam = "Ilość zdjęć")
+
+    Dropdown(suggestions = suggestionsDelay, labelParam = "Opóźnienie (sekundy)")
+
+    Dropdown(suggestions = suggestionsBanner, labelParam = "Baner")
+
+}
+
+@Composable
+fun Dropdown(
     modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
-    onItemClick: (MenuItem) -> Unit
+    suggestions: List<String>,
+    labelParam: String
 ) {
-    LazyColumn(modifier) {
-        items(items) { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onItemClick(item)
-                    }
-                    .padding(16.dp)
-            ) {
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = item.contentDescription
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = item.title,
-                    style = itemTextStyle,
-                    modifier = Modifier.weight(1f)
-                )
+
+    var expanded by remember { mutableStateOf(false) }
+    var textfieldSize by remember { mutableStateOf(Size.Zero)}
+
+    val icon = if (expanded)
+        Icons.Filled.KeyboardArrowUp
+    else
+        Icons.Filled.KeyboardArrowDown
+
+    Column() {
+        OutlinedTextField(
+            value = "",
+            onValueChange = {  },
+            readOnly=true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp, 0.dp)
+                .onGloballyPositioned { coordinates ->
+                    //This value is used to assign to the DropDown the same width
+                    textfieldSize = coordinates.size.toSize()
+                }
+                .clickable { expanded = !expanded },
+            label = { Text(labelParam) },
+            trailingIcon = {
+                Icon(icon, "contentDescription",
+                    Modifier.clickable { expanded = !expanded })
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+//                .width(100.dp)
+                .width(with(LocalDensity.current) { textfieldSize.width.toDp() + 40.dp })
+        ) {
+            suggestions.forEach { label ->
+                DropdownMenuItem(onClick = {
+
+                    expanded = false
+                }) {
+                    Text(text = label)
+                }
             }
         }
     }
+
+    Spacer(modifier = Modifier.height(50.dp))
 }

@@ -2,9 +2,7 @@ package com.example.fotofun.di
 
 import android.app.Application
 import androidx.room.Room
-import com.example.fotofun.data.AssistantDatabase
-import com.example.fotofun.data.AssistantRepository
-import com.example.fotofun.data.AssistantRepositoryImpl
+import com.example.fotofun.data.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,10 +15,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFotoFunDatabase(app: Application): AssistantDatabase {
+    fun provideFotoFunDatabase(app: Application): FotoFunDatabase {
         return Room.databaseBuilder(
             app,
-            AssistantDatabase::class.java,
+            FotoFunDatabase::class.java,
             "todo_db"
         )
             .fallbackToDestructiveMigration()
@@ -29,7 +27,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFotoFunRepository(db: AssistantDatabase): AssistantRepository {
-        return AssistantRepositoryImpl(db.dao)
+    fun provideFotoFunRepository(db: FotoFunDatabase): FotoFunRepository {
+        return FotoFunRepositoryImpl(db.dao)
     }
 }

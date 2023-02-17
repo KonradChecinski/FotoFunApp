@@ -2,6 +2,7 @@ package com.example.fotofun.ui.app_view
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.data.AssistantRepository
+import com.example.fotofun.data.FotoFunRepository
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -35,7 +37,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    private val repository: AssistantRepository,
+    private val repository: FotoFunRepository,
 ): ViewModel() {
 
     private val _uiEvent =  Channel<UiEvent>()
@@ -81,6 +83,17 @@ class AppViewModel @Inject constructor(
     }
 
     fun handleImageCapture(uri: Uri) {
+        // PHOTO TAKEN SOUND
+        try {
+            val notification: Uri =
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            val r = RingtoneManager.getRingtone(applicationContext, notification)
+            r.play()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         Log.i("kilo", "Image captured: $uri")
 //        shouldShowCamera.value = false
 
@@ -126,9 +139,12 @@ class AppViewModel @Inject constructor(
 
         viewModelScope.launch {
 
+            // PHOTO SERIES LOOP
             for (i in 0..howMany) {
 
                 if(i <= howMany - 1) {
+                    //
+
                     Log.i("tag", "This'll run $delayMilliseconds ms later: $i")
 
                     val photoFile = File(
@@ -149,6 +165,7 @@ class AppViewModel @Inject constructor(
                             onImageCaptured(savedUri)
                         }
                     })
+
                 }
                 else {
                     shouldShowPhoto.value = false
@@ -162,7 +179,7 @@ class AppViewModel @Inject constructor(
 
     fun uriToBitmapAppViewModel(parcelFileDescriptor: ParcelFileDescriptor): Bitmap? {
 
-        val fileDescriptor: FileDescriptor = parcelFileDescriptor!!.fileDescriptor
+        val fileDescriptor: FileDescriptor = parcelFileDescriptor.fileDescriptor
         val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
         parcelFileDescriptor.close()
         return image

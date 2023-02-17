@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.data.AssistantRepository
+import com.example.fotofun.data.FotoFunRepository
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +26,7 @@ import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val repository: AssistantRepository
+    private val repository: FotoFunRepository
 ): ViewModel() {
 
     private val _uiEvent =  Channel<UiEvent>()
