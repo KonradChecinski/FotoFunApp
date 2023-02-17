@@ -20,6 +20,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fotofun.FotoFun
 import com.example.fotofun.data.AssistantRepository
 import com.example.fotofun.data.FotoFunRepository
 import com.example.fotofun.util.UiEvent
@@ -39,6 +40,8 @@ import javax.inject.Inject
 class AppViewModel @Inject constructor(
     private val repository: FotoFunRepository,
 ): ViewModel() {
+
+    val applicationContext = FotoFun.applicationContext()
 
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -86,7 +89,7 @@ class AppViewModel @Inject constructor(
         // PHOTO TAKEN SOUND
         try {
             val notification: Uri =
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val r = RingtoneManager.getRingtone(applicationContext, notification)
             r.play()
 
@@ -139,6 +142,19 @@ class AppViewModel @Inject constructor(
 
         viewModelScope.launch {
 
+            // START TAKING PHOTOS (AFTER BUTTON PRESS)
+            try {
+                val notification: Uri =
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val r = RingtoneManager.getRingtone(applicationContext, notification)
+                r.play()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            delay(delayMilliseconds)
+
             // PHOTO SERIES LOOP
             for (i in 0..howMany) {
 
@@ -173,6 +189,17 @@ class AppViewModel @Inject constructor(
 
                 shouldShowPhoto.value = false
                 delay(delayMilliseconds)
+            }
+
+            // AFTER TAKING ALL PHOTOS
+            try {
+                val notification: Uri =
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val r = RingtoneManager.getRingtone(applicationContext, notification)
+                r.play()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
