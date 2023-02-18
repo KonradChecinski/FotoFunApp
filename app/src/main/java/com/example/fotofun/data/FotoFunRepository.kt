@@ -13,4 +13,6 @@ interface FotoFunRepository {
     suspend fun addSetting(setting: Setting)
 
     suspend fun updateSetting(settingName: String, settingValue: Long)
+
+    suspend fun deleteTable()
 }

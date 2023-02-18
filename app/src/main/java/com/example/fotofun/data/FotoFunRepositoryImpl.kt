@@ -26,4 +26,8 @@ class FotoFunRepositoryImpl(
     override suspend fun updateSetting(settingName: String, settingValue: Long) {
         return dao.updateSetting(settingName, settingValue)
     }
+
+    override suspend fun deleteTable() {
+        dao.deleteTable()
+    }
 }

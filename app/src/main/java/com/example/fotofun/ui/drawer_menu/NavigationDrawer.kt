@@ -16,8 +16,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fotofun.ui.app_view.AppViewEvent
 import com.example.fotofun.ui.app_view.AppViewModel
+import kotlin.jvm.internal.FunctionReference
 
 @Composable
 fun DrawerHeader() {
@@ -39,7 +41,7 @@ fun DrawerBody(
 
     val suggestionsHowManyPhotos = listOf("5", "6")
     val suggestionsDelay = listOf("1", "2", "3", "4", "5")
-    val suggestionsBanner = listOf("baner1", "baner2", "baner3", "baner4")
+    val suggestionsBanner = listOf("1", "2", "3", "4")
 
 
 
@@ -47,19 +49,19 @@ fun DrawerBody(
     Dropdown(
         suggestions = suggestionsHowManyPhotos,
         labelParam = "Ilość zdjęć",
-        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+        valueParam =  viewModel.getSettingValue("photosQuantity").toString(),
     )
 
     Dropdown(
         suggestions = suggestionsDelay,
         labelParam = "Opóźnienie (sekundy)",
-        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+        valueParam = viewModel.getSettingValue("photosDelay").toString().slice(listOf(0))
     )
 
     Dropdown(
         suggestions = suggestionsBanner,
         labelParam = "Baner",
-        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+        valueParam = viewModel.getSettingValue("banner").toString()
     )
 
 }
@@ -68,6 +70,7 @@ fun DrawerBody(
 fun Dropdown(
     modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
+    viewModel: AppViewModel = hiltViewModel(),
     suggestions: List<String>,
     labelParam: String,
     valueParam: String
@@ -84,7 +87,18 @@ fun Dropdown(
     Column() {
         OutlinedTextField(
             value = valueParam,
-            onValueChange = {  },
+            onValueChange =
+            {
+                when (labelParam) {
+                    "Ilość zdjęć" -> {
+                        viewModel.onEvent(AppViewEvent.OnSetPhotosQuantity(it.toLong()))
+                    }
+                    "Opóźnienie (sekundy)" -> {
+                        viewModel.onEvent(AppViewEvent.OnSetDelay((it + "000").toLong()))
+                    }
+                    else -> viewModel.onEvent(AppViewEvent.OnSetBanner(it.toLong()))
+                }
+            },
             readOnly=true,
             modifier = Modifier
                 .fillMaxWidth()

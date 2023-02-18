@@ -110,29 +110,35 @@ class AppViewModel @Inject constructor(
             }
 
             is AppViewEvent.OnAppLoad -> {
-                if (repository.getSettings() == null) {
-
+                Log.i("gromzi", "getSettings(): ${repository.getSettings().toString()}" )
+//                if (repository.getSettings() == null) {
+                    Log.i("gromzi", "getSettings() było null")
                     viewModelScope.launch {
                         repository.addSetting(
                             setting = Setting(
+                                settingId = 1,
                                 settingName = "photosQuantity",
                                 settingValue = 5
                             )
                         )
                         repository.addSetting(
                             setting = Setting(
+                                settingId = 2,
                                 settingName = "photosDelay",
                                 settingValue = 3000
                             )
                         )
                         repository.addSetting(
                             setting = Setting(
+                                settingId = 3,
                                 settingName = "banner",
                                 settingValue = 1
                             )
                         )
+
+//                        repository.deleteTable()
                     }
-                }
+//                }
             }
 
             is AppViewEvent.OnSetPhotosQuantity -> {

@@ -25,4 +25,7 @@ interface FotoFunDao {
 
     @Query("UPDATE Setting SET settingValue = :settingValue WHERE settingName = :settingName")
     suspend fun updateSetting(settingName: String, settingValue: Long)
+
+    @Query("DELETE FROM Setting")
+    suspend fun deleteTable()
 }
