@@ -15,6 +15,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.fotofun.ui.app_view.AppViewEvent
+import com.example.fotofun.ui.app_view.AppViewModel
 
 @Composable
 fun DrawerHeader() {
@@ -30,7 +33,8 @@ fun DrawerHeader() {
 
 @Composable
 fun DrawerBody(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AppViewModel = hiltViewModel()
 ) {
 
     val suggestionsHowManyPhotos = listOf("5", "6")
@@ -38,11 +42,25 @@ fun DrawerBody(
     val suggestionsBanner = listOf("baner1", "baner2", "baner3", "baner4")
 
 
-    Dropdown(suggestions = suggestionsHowManyPhotos, labelParam = "Ilość zdjęć")
 
-    Dropdown(suggestions = suggestionsDelay, labelParam = "Opóźnienie (sekundy)")
 
-    Dropdown(suggestions = suggestionsBanner, labelParam = "Baner")
+    Dropdown(
+        suggestions = suggestionsHowManyPhotos,
+        labelParam = "Ilość zdjęć",
+        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+    )
+
+    Dropdown(
+        suggestions = suggestionsDelay,
+        labelParam = "Opóźnienie (sekundy)",
+        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+    )
+
+    Dropdown(
+        suggestions = suggestionsBanner,
+        labelParam = "Baner",
+        valueParam = "" /* viewModel.getSettingValue("photosQuantity").toString() */
+    )
 
 }
 
@@ -51,7 +69,8 @@ fun Dropdown(
     modifier: Modifier = Modifier,
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp),
     suggestions: List<String>,
-    labelParam: String
+    labelParam: String,
+    valueParam: String
 ) {
 
     var expanded by remember { mutableStateOf(false) }
@@ -64,7 +83,7 @@ fun Dropdown(
 
     Column() {
         OutlinedTextField(
-            value = "",
+            value = valueParam,
             onValueChange = {  },
             readOnly=true,
             modifier = Modifier

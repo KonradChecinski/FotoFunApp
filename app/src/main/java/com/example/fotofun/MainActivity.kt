@@ -19,10 +19,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.fotofun.data.FotoFunRepository
 import com.example.fotofun.ui.app_view.AppView
+import com.example.fotofun.ui.app_view.AppViewModel
 import com.example.fotofun.ui.drawer_menu.AppBar
 import com.example.fotofun.ui.drawer_menu.DrawerBody
 import com.example.fotofun.ui.drawer_menu.DrawerHeader
@@ -94,6 +97,7 @@ class MainActivity : ComponentActivity() {
     // endregion
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             AssistantAppTheme {
                 val navController = rememberNavController()

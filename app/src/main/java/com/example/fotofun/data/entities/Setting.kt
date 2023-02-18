@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Setting(
-    @PrimaryKey val optionId: Int? = null,
+    @PrimaryKey val settingId: Int? = null,
     val settingName: String,
     val settingValue: Long
 )

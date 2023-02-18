@@ -17,18 +17,24 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.FotoFun
 import com.example.fotofun.data.AssistantRepository
 import com.example.fotofun.data.FotoFunRepository
+import com.example.fotofun.data.entities.Setting
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileDescriptor
 import java.text.SimpleDateFormat
@@ -39,6 +45,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val repository: FotoFunRepository,
+    savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
     val applicationContext = FotoFun.applicationContext()
@@ -49,7 +56,7 @@ class AppViewModel @Inject constructor(
     lateinit var photoUri: Uri
     var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
 
-    var photos: MutableList<Bitmap?> = mutableListOf<Bitmap?>()
+    var images: MutableList<Bitmap?> = mutableListOf<Bitmap?>()
 
 
     // SETUP
@@ -59,6 +66,31 @@ class AppViewModel @Inject constructor(
         .build()
 
     var preview = Preview.Builder().setTargetAspectRatio(RATIO_4_3).build()
+
+
+    var setting by mutableStateOf<Setting?>(null)
+        private set
+
+    var settingName by mutableStateOf<String>("")
+        private set
+
+    var settingValue by mutableStateOf<Long>(0)
+        private set
+
+    init {
+        val settingId = savedStateHandle.get<Int>("settingId")
+
+        if(settingId != null) {
+            viewModelScope.launch {
+                repository.getSettingById(settingId)?.let { setting ->
+                    settingName = setting.settingName
+                    settingValue = setting.settingValue
+
+                    this@AppViewModel.setting = setting
+                }
+            }
+        }
+    }
 
 
     fun onEvent(event: AppViewEvent) {
@@ -76,7 +108,71 @@ class AppViewModel @Inject constructor(
                     event.delayMilliseconds
                 )
             }
+
+            is AppViewEvent.OnAppLoad -> {
+                if (repository.getSettings() == null) {
+
+                    viewModelScope.launch {
+                        repository.addSetting(
+                            setting = Setting(
+                                settingName = "photosQuantity",
+                                settingValue = 5
+                            )
+                        )
+                        repository.addSetting(
+                            setting = Setting(
+                                settingName = "photosDelay",
+                                settingValue = 3000
+                            )
+                        )
+                        repository.addSetting(
+                            setting = Setting(
+                                settingName = "banner",
+                                settingValue = 1
+                            )
+                        )
+                    }
+                }
+            }
+
+            is AppViewEvent.OnSetPhotosQuantity -> {
+                viewModelScope.launch {
+                    repository.updateSetting(
+                        settingName = "photosQuantity",
+                        settingValue = event.settingValue
+                    )
+                }
+            }
+
+            is AppViewEvent.OnSetDelay -> {
+                viewModelScope.launch {
+                    repository.updateSetting(
+                        settingName = "photosDelay",
+                        settingValue = event.settingValue
+                    )
+                }
+            }
+
+            is AppViewEvent.OnSetBanner -> {
+                viewModelScope.launch {
+                    repository.updateSetting(
+                        settingName = "banner",
+                        settingValue = event.settingValue
+                    )
+                }
+            }
+
+//           is AppViewEvent.OnGetSettingValue -> {
+//               viewModelScope.launch {
+//                   repository.getSettingValue(settingName)
+//                   return@launch
+//               }
+//           }
         }
+    }
+
+    fun getSettingValue(settingName: String): Long = runBlocking {
+        repository.getSettingValue(settingName)
     }
 
     private fun sendUiEvent(event: UiEvent) {

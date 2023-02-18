@@ -64,7 +64,8 @@ fun AppView(
     outputDirectory: File
 ) {
 
-
+    // SET DEFAULT SETTINGS
+    viewModel.onEvent(AppViewEvent.OnAppLoad)
 
 
 
@@ -119,7 +120,7 @@ fun AppView(
                         contentDescription = "Take picture",
                         tint = Color.White,
                         modifier = Modifier
-                            .size(150.dp)
+                            .size(300.dp)
                             .padding(1.dp)
                             .border(1.dp, Color.White, CircleShape)
                     )
