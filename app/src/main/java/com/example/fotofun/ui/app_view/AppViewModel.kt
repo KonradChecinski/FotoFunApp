@@ -241,7 +241,7 @@ class AppViewModel @Inject constructor(
             // START TAKING PHOTOS (AFTER BUTTON PRESS)
             try {
                 val sound = MediaActionSound()
-                sound.play(MediaActionSound.SHUTTER_CLICK)
+                sound.play(MediaActionSound.START_VIDEO_RECORDING)
 //                val notification: Uri =
 //                    RingtoneManager.getDefaultUri(RingtoneManager.)
 //                val r = RingtoneManager.getRingtone(applicationContext, notification)
@@ -292,10 +292,8 @@ class AppViewModel @Inject constructor(
 
             // AFTER TAKING ALL PHOTOS
             try {
-                val notification: Uri =
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val r = RingtoneManager.getRingtone(applicationContext, notification)
-                r.play()
+                val sound = MediaActionSound()
+                sound.play(MediaActionSound.STOP_VIDEO_RECORDING)
 
                 for (image in images) {
                     Log.d("gromzi", image.toString())
