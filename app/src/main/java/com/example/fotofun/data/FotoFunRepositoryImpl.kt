@@ -1,5 +1,6 @@
 package com.example.fotofun.data
 
+import androidx.lifecycle.LiveData
 import com.example.fotofun.data.entities.Setting
 import kotlinx.coroutines.flow.Flow
 
@@ -15,8 +16,16 @@ class FotoFunRepositoryImpl(
         return dao.getSettingValue(settingName)
     }
 
-    override fun getSettings(): Flow<List<Setting>>? {
+    override fun getSettings(): LiveData<List<Setting>> {
         return dao.getSettings()
+    }
+
+    override fun getSettingsFlow(): Flow<List<Setting>> {
+        return dao.getSettingsFlow()
+    }
+
+    override suspend fun checkIfSettingsEmpty(): Boolean {
+        return dao.checkIfSettingsEmpty()
     }
 
     override suspend fun addSetting(setting: Setting) {

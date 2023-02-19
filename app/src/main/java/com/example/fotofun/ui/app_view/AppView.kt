@@ -66,6 +66,7 @@ fun AppView(
 
     // SET DEFAULT SETTINGS
     viewModel.onEvent(AppViewEvent.OnAppLoad)
+    val settings = viewModel.settings.collectAsState(initial = emptyList())
 
 
 
@@ -109,8 +110,8 @@ fun AppView(
                         onImageCaptured = viewModel::handleImageCapture,
                         onError = { Log.e("kilo", "View error:", it) },
 
-                        howMany = 5,
-                        delayMilliseconds = 3000
+                        howMany = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toInt() else 5,
+                        delayMilliseconds = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue else 3000
                     )
                     )
                 },

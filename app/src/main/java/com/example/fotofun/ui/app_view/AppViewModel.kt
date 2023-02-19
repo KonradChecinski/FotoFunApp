@@ -2,36 +2,28 @@ package com.example.fotofun.ui.app_view
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaActionSound
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.util.Rational
-import android.util.Size
-import android.view.Surface
 import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.FotoFun
-import com.example.fotofun.data.AssistantRepository
 import com.example.fotofun.data.FotoFunRepository
 import com.example.fotofun.data.entities.Setting
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -42,6 +34,7 @@ import java.util.*
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
+
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val repository: FotoFunRepository,
@@ -50,13 +43,19 @@ class AppViewModel @Inject constructor(
 
     val applicationContext = FotoFun.applicationContext()
 
+    val settings = repository.getSettingsFlow()
+    val settingsLiveData = repository.getSettings()
+    var checkIfSettingsEmpty: Boolean = false
+
+
+
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     lateinit var photoUri: Uri
     var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
 
-    var images: MutableList<Bitmap?> = mutableListOf<Bitmap?>()
+    var images: MutableList<File> = mutableListOf<File>()
 
 
     // SETUP
@@ -68,28 +67,19 @@ class AppViewModel @Inject constructor(
     var preview = Preview.Builder().setTargetAspectRatio(RATIO_4_3).build()
 
 
-    var setting by mutableStateOf<Setting?>(null)
-        private set
-
-    var settingName by mutableStateOf<String>("")
-        private set
-
-    var settingValue by mutableStateOf<Long>(0)
-        private set
-
     init {
-        val settingId = savedStateHandle.get<Int>("settingId")
+//        val settingId = savedStateHandle.get<Int>("settingId")
 
-        if(settingId != null) {
-            viewModelScope.launch {
-                repository.getSettingById(settingId)?.let { setting ->
-                    settingName = setting.settingName
-                    settingValue = setting.settingValue
-
-                    this@AppViewModel.setting = setting
-                }
-            }
-        }
+//        if(settingId != null) {
+//            viewModelScope.launch {
+//                repository.getSettingById(settingId)?.let { setting ->
+//                    settingName = setting.settingName
+//                    settingValue = setting.settingValue
+//
+//                    this@AppViewModel.setting = setting
+//                }
+//            }
+//        }
     }
 
 
@@ -111,59 +101,76 @@ class AppViewModel @Inject constructor(
 
             is AppViewEvent.OnAppLoad -> {
                 Log.i("gromzi", "getSettings(): ${repository.getSettings().toString()}" )
-//                if (repository.getSettings() == null) {
-                    Log.i("gromzi", "getSettings() było null")
-                    viewModelScope.launch {
-                        repository.addSetting(
-                            setting = Setting(
-                                settingId = 1,
-                                settingName = "photosQuantity",
-                                settingValue = 5
+                viewModelScope.launch{
+                    checkIfSettingsEmpty = repository.checkIfSettingsEmpty()
+                    //                    repository.deleteTable()
+
+                    if (checkIfSettingsEmpty) {
+                        Log.i("gromzi", "getSettings() było null")
+                        viewModelScope.launch {
+                            repository.addSetting(
+                                setting = Setting(
+                                    settingId = 1,
+                                    settingName = "photosQuantity",
+                                    settingValue = 5
+                                )
                             )
-                        )
-                        repository.addSetting(
-                            setting = Setting(
-                                settingId = 2,
-                                settingName = "photosDelay",
-                                settingValue = 3000
+                            repository.addSetting(
+                                setting = Setting(
+                                    settingId = 2,
+                                    settingName = "photosDelay",
+                                    settingValue = 3000
+                                )
                             )
-                        )
-                        repository.addSetting(
-                            setting = Setting(
-                                settingId = 3,
-                                settingName = "banner",
-                                settingValue = 1
+                            repository.addSetting(
+                                setting = Setting(
+                                    settingId = 3,
+                                    settingName = "banner",
+                                    settingValue = 1
+                                )
                             )
-                        )
 
 //                        repository.deleteTable()
-                    }
-//                }
+                        }
+                }
+
+                }
             }
 
             is AppViewEvent.OnSetPhotosQuantity -> {
+                Log.d("gromzi", "quantity")
                 viewModelScope.launch {
-                    repository.updateSetting(
-                        settingName = "photosQuantity",
-                        settingValue = event.settingValue
+                    repository.addSetting(
+                        setting = Setting(
+                            settingId = 1,
+                            settingName = "photosQuantity",
+                            settingValue = event.settingValue
+                        )
                     )
                 }
             }
 
             is AppViewEvent.OnSetDelay -> {
                 viewModelScope.launch {
-                    repository.updateSetting(
-                        settingName = "photosDelay",
-                        settingValue = event.settingValue
+                    repository.addSetting(
+                        setting = Setting(
+                            settingId = 2,
+                            settingName = "photosDelay",
+                            settingValue = event.settingValue
+                        )
                     )
+
                 }
             }
 
             is AppViewEvent.OnSetBanner -> {
                 viewModelScope.launch {
-                    repository.updateSetting(
-                        settingName = "banner",
-                        settingValue = event.settingValue
+                    repository.addSetting(
+                        setting = Setting(
+                            settingId = 3,
+                            settingName = "banner",
+                            settingValue = event.settingValue
+                        )
                     )
                 }
             }
@@ -207,19 +214,6 @@ class AppViewModel @Inject constructor(
 
 
     }
-    fun asasa(){
-
-        Handler(Looper.getMainLooper()).postDelayed(
-            {
-                shouldShowPhoto.value = false
-    //            photos.add(uriToBitmap(photoUri))
-
-
-                takePhotoSeries(5, 1000)
-            },
-            3000
-        )
-    }
 
     private fun takePhotoSeries(index: Int, delayMilliseconds: Long) {
         viewModelScope.launch {
@@ -246,10 +240,12 @@ class AppViewModel @Inject constructor(
 
             // START TAKING PHOTOS (AFTER BUTTON PRESS)
             try {
-                val notification: Uri =
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val r = RingtoneManager.getRingtone(applicationContext, notification)
-                r.play()
+                val sound = MediaActionSound()
+                sound.play(MediaActionSound.SHUTTER_CLICK)
+//                val notification: Uri =
+//                    RingtoneManager.getDefaultUri(RingtoneManager.)
+//                val r = RingtoneManager.getRingtone(applicationContext, notification)
+//                r.play()
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -280,6 +276,7 @@ class AppViewModel @Inject constructor(
 
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val savedUri = Uri.fromFile(photoFile)
+                            images.add(photoFile)
                             onImageCaptured(savedUri)
                         }
                     })
@@ -299,6 +296,10 @@ class AppViewModel @Inject constructor(
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                 val r = RingtoneManager.getRingtone(applicationContext, notification)
                 r.play()
+
+                for (image in images) {
+                    Log.d("gromzi", image.toString())
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()

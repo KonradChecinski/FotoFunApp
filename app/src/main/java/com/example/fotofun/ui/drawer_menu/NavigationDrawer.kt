@@ -39,29 +39,30 @@ fun DrawerBody(
     viewModel: AppViewModel = hiltViewModel()
 ) {
 
-    val suggestionsHowManyPhotos = listOf("5", "6")
+    val suggestionsHowManyPhotos = listOf("4", "5", "6")
     val suggestionsDelay = listOf("1", "2", "3", "4", "5")
     val suggestionsBanner = listOf("1", "2", "3", "4")
 
+    val settings = viewModel.settings.collectAsState(initial = emptyList())
 
 
 
     Dropdown(
         suggestions = suggestionsHowManyPhotos,
         labelParam = "Ilość zdjęć",
-        valueParam =  viewModel.getSettingValue("photosQuantity").toString(),
+        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toString() else ""
     )
 
     Dropdown(
         suggestions = suggestionsDelay,
         labelParam = "Opóźnienie (sekundy)",
-        valueParam = viewModel.getSettingValue("photosDelay").toString().slice(listOf(0))
+        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue.toString().slice(0..0) else ""
     )
 
     Dropdown(
         suggestions = suggestionsBanner,
         labelParam = "Baner",
-        valueParam = viewModel.getSettingValue("banner").toString()
+        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toString() else ""
     )
 
 }
@@ -123,7 +124,15 @@ fun Dropdown(
         ) {
             suggestions.forEach { label ->
                 DropdownMenuItem(onClick = {
-
+                    when (labelParam) {
+                        "Ilość zdjęć" -> {
+                            viewModel.onEvent(AppViewEvent.OnSetPhotosQuantity(label.toLong()))
+                        }
+                        "Opóźnienie (sekundy)" -> {
+                            viewModel.onEvent(AppViewEvent.OnSetDelay((label + "000").toLong()))
+                        }
+                        else -> viewModel.onEvent(AppViewEvent.OnSetBanner(label.toLong()))
+                    }
                     expanded = false
                 }) {
                     Text(text = label)

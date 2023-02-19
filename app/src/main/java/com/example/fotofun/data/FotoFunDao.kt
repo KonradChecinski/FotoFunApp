@@ -1,5 +1,6 @@
 package com.example.fotofun.data
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -18,7 +19,13 @@ interface FotoFunDao {
     suspend fun getSettingValue(settingName: String): Long
 
     @Query("SELECT * FROM Setting")
-    fun getSettings(): Flow<List<Setting>>?
+    fun getSettings(): LiveData<List<Setting>>
+
+    @Query("SELECT * FROM Setting")
+    fun getSettingsFlow(): Flow<List<Setting>>
+
+    @Query("SELECT (SELECT COUNT(*) FROM Setting LIMIT 1) == 0")
+    suspend fun checkIfSettingsEmpty(): Boolean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addSetting(setting: Setting)

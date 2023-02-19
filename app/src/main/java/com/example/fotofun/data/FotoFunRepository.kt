@@ -1,5 +1,6 @@
 package com.example.fotofun.data
 
+import androidx.lifecycle.LiveData
 import com.example.fotofun.data.entities.Setting
 import kotlinx.coroutines.flow.Flow
 
@@ -8,7 +9,11 @@ interface FotoFunRepository {
 
     suspend fun getSettingValue(settingName: String): Long
 
-    fun getSettings(): Flow<List<Setting>>?
+    fun getSettings(): LiveData<List<Setting>>
+
+    fun getSettingsFlow(): Flow<List<Setting>>
+
+    suspend fun checkIfSettingsEmpty(): Boolean
 
     suspend fun addSetting(setting: Setting)
 
