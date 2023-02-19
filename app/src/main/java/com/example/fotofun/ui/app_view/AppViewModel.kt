@@ -47,13 +47,12 @@ class AppViewModel @Inject constructor(
     val settingsLiveData = repository.getSettings()
     var checkIfSettingsEmpty: Boolean = false
 
-
-
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     lateinit var photoUri: Uri
     var shouldShowPhoto: MutableState<Boolean> = mutableStateOf(false)
+    var shouldShowPopup: MutableState<Boolean> = mutableStateOf(false)
 
     var images: MutableList<File> = mutableListOf<File>()
 
@@ -215,15 +214,6 @@ class AppViewModel @Inject constructor(
 
     }
 
-    private fun takePhotoSeries(index: Int, delayMilliseconds: Long) {
-        viewModelScope.launch {
-            for (i in 0..index) {
-                Log.i("tag", "This'll run $delayMilliseconds ms later: $i")
-                delay(delayMilliseconds)
-            }
-        }
-    }
-
     private fun takePhotos(
         filenameFormat: String,
         imageCapture: ImageCapture,
@@ -299,6 +289,9 @@ class AppViewModel @Inject constructor(
                     Log.d("gromzi", image.toString())
                 }
 
+                shouldShowPopup.value = true
+//                uploadImages(images)
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -315,5 +308,10 @@ class AppViewModel @Inject constructor(
         return null
     }
 
+    private fun uploadImages(images: List<File>) {
+        viewModelScope.launch {
+            repository.uploadImages(images)
+        }
+    }
 
 }

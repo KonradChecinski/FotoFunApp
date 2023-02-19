@@ -3,6 +3,7 @@ package com.example.fotofun.ui.app_view
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Paint.Align
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -18,12 +19,12 @@ import androidx.camera.core.ViewPort
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Lens
 import androidx.compose.runtime.*
@@ -152,6 +153,41 @@ fun AppView(
                 .fillMaxSize()
                 .padding(20.dp)
         )
+    }
+
+    if (viewModel.shouldShowPopup.value) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 270.dp)
+                .size(300.dp, 150.dp)
+                .background(color = MaterialTheme.colors.background)
+        ) {
+            Column(modifier = Modifier.align(Alignment.Center)) {
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(10.dp)
+                    ,
+                    text = "Jak przesłać zdjęcia?"
+                )
+
+                Row() {
+                    Button(
+                        modifier = Modifier.size(150.dp, 80.dp).padding(5.dp, 10.dp),
+                        onClick = { viewModel.shouldShowPopup.value = false }
+                    ) {
+                        Text(text = "Pobierz pdf")
+                    }
+                    Button(
+                        modifier = Modifier.size(150.dp, 80.dp).padding(5.dp, 10.dp),
+                        onClick = { viewModel.shouldShowPopup.value = false }
+                    ) {
+                        Text(text = "Wyślij na maila")
+                    }
+                }
+            }
+        }
     }
 }
 
