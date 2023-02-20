@@ -104,7 +104,7 @@ class AppViewModel @Inject constructor(
                 Log.i("gromzi", "getSettings(): ${repository.getSettings().toString()}" )
                 viewModelScope.launch{
                     checkIfSettingsEmpty = repository.checkIfSettingsEmpty()
-                    //                    repository.deleteTable()
+//                                        repository.deleteTable()
 
                     if (checkIfSettingsEmpty) {
                         Log.i("gromzi", "getSettings() było null")
@@ -133,7 +133,7 @@ class AppViewModel @Inject constructor(
 
 //                        repository.deleteTable()
                         }
-                }
+                    }
 
                 }
             }

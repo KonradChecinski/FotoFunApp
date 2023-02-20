@@ -60,7 +60,7 @@ fun DrawerBody(
     Dropdown(
         suggestions = suggestionsDelay,
         labelParam = "Opóźnienie (sekundy)",
-        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue.toString().slice(0..0) else ""
+        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue.toString().slice(listOf(0)) else ""
     )
 
     Dropdown(
