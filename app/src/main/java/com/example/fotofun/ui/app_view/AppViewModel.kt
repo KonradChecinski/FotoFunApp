@@ -58,7 +58,7 @@ class AppViewModel @Inject constructor(
 
 
     // SETUP
-    val lensFacing = CameraSelector.LENS_FACING_BACK
+    val lensFacing = CameraSelector.LENS_FACING_FRONT
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
@@ -94,7 +94,9 @@ class AppViewModel @Inject constructor(
                     event.onError,
 
                     event.howMany,
-                    event.delayMilliseconds
+                    event.delayMilliseconds,
+                    event.baner,
+                    event.email
                 )
             }
 
@@ -196,10 +198,8 @@ class AppViewModel @Inject constructor(
     fun handleImageCapture(uri: Uri) {
         // PHOTO TAKEN SOUND
         try {
-            val notification: Uri =
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            val r = RingtoneManager.getRingtone(applicationContext, notification)
-            r.play()
+            val sound = MediaActionSound()
+            sound.play(MediaActionSound.SHUTTER_CLICK)
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -223,7 +223,9 @@ class AppViewModel @Inject constructor(
         onError: (ImageCaptureException) -> Unit,
 
         howMany: Int,
-        delayMilliseconds: Long
+        delayMilliseconds: Long,
+        baner: Int,
+        email: String = ""
     ) {
 
         viewModelScope.launch {
@@ -247,9 +249,6 @@ class AppViewModel @Inject constructor(
             for (i in 0..howMany) {
 
                 if(i <= howMany - 1) {
-                    //
-
-                    Log.i("tag", "This'll run $delayMilliseconds ms later: $i")
 
                     val photoFile = File(
                         outputDirectory,
@@ -290,7 +289,12 @@ class AppViewModel @Inject constructor(
                 }
 
                 shouldShowPopup.value = true
-//                uploadImages(images)
+
+
+
+                val result = uploadImages(images, baner, email)
+                images.clear()
+                shouldShowPopup.value = false
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -308,9 +312,15 @@ class AppViewModel @Inject constructor(
         return null
     }
 
-    private fun uploadImages(images: List<File>) {
+    private fun uploadImages(images: List<File>, baner: Int, email: String) {
         viewModelScope.launch {
-            repository.uploadImages(images)
+            val result = repository.uploadImages(images, baner, email)
+
+//            Log.i("gromzi", "oddało")
+//            Log.i("gromzi", result?.raw().toString())
+//
+//            Log.i("gromzi", result?.code().toString())
+//            Log.i("gromzi", result?.body()?.result.toString())
         }
     }
 

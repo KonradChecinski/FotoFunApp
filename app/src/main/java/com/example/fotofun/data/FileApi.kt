@@ -1,21 +1,30 @@
 package com.example.fotofun.data
 
-import okhttp3.MultipartBody
+import androidx.annotation.StringRes
+import com.example.fotofun.data.entities.SimpleJSONResponse
+import okhttp3.*
+import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.http.Multipart
-import retrofit2.http.Part
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.*
+import java.io.IOException
 
 interface FileApi {
 
-    @Multipart
+    @POST("foto")
     suspend fun uploadImages(
-        @Part images: MultipartBody.Part
-    )
+        @Header("Authorization") token: String,
+        @Body body: RequestBody
+    ) : Call<ResponseBody>
+
+
 
     companion object {
         val instance by lazy {
             Retrofit.Builder()
-                .baseUrl("http://dom.webitup.pl/api/foto/")
+                .baseUrl("http://dom.webitup.pl/api/")
+                .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(FileApi::class.java)
         }

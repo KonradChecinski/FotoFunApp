@@ -1,11 +1,15 @@
 package com.example.fotofun.data
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import com.example.fotofun.data.entities.Setting
+import com.example.fotofun.data.entities.SimpleJSONResponse
 import kotlinx.coroutines.flow.Flow
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.HttpException
+import retrofit2.Response
 import java.io.File
 import java.io.IOException
 
@@ -25,25 +29,7 @@ interface FotoFunRepository {
     suspend fun updateSetting(settingName: String, settingValue: Long)
 
     suspend fun deleteTable()
+//    Response<StringRes>
+    suspend fun uploadImages(images: List<File>, baner: Int, email: String)
 
-    suspend fun uploadImages(images: List<File>): Boolean {
-
-        return try {
-            FileApi.instance.uploadImages(
-                images = MultipartBody.Part
-                    .createFormData(
-                        "images",
-                        images[0].name,
-                        images[0].asRequestBody()
-                    )
-            )
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        } catch (e: HttpException) {
-            e.printStackTrace()
-            false
-        }
-    }
 }

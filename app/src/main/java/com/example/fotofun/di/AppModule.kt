@@ -19,7 +19,7 @@ object AppModule {
         return Room.databaseBuilder(
             app,
             FotoFunDatabase::class.java,
-            "todo_db"
+            "FotoFun"
         )
             .fallbackToDestructiveMigration()
             .build()

@@ -104,16 +104,18 @@ fun AppView(
                     Log.i("kilo", "ON CLICK")
                     viewModel.onEvent(
                         AppViewEvent.OnTakePhoto(
-                        filenameFormat = "dd-MM-yyyy-HH-mm-ss-SSS",
-                        imageCapture = imageCapture,
-                        outputDirectory = outputDirectory,
-                        executor = cameraExecutor,
-                        onImageCaptured = viewModel::handleImageCapture,
-                        onError = { Log.e("kilo", "View error:", it) },
+                            filenameFormat = "dd-MM-yyyy-HH-mm-ss-SSS",
+                            imageCapture = imageCapture,
+                            outputDirectory = outputDirectory,
+                            executor = cameraExecutor,
+                            onImageCaptured = viewModel::handleImageCapture,
+                            onError = { Log.e("kilo", "View error:", it) },
 
-                        howMany = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toInt() else 5,
-                        delayMilliseconds = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue else 3000
-                    )
+                            howMany = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toInt() else 5,
+                            delayMilliseconds = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue else 3000,
+                            baner = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toInt() else 1,
+                            email = ""
+                        )
                     )
                 },
                 content = {

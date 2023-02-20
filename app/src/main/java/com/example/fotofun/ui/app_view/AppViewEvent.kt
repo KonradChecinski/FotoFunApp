@@ -18,7 +18,9 @@ sealed class AppViewEvent {
         val onError: (ImageCaptureException) -> Unit,
 
         val howMany: Int,
-        val delayMilliseconds: Long
+        val delayMilliseconds: Long,
+        val baner: Int,
+        val email: String
 
     ): AppViewEvent()
 
