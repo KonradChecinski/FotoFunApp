@@ -291,10 +291,9 @@ class AppViewModel @Inject constructor(
                 shouldShowPopup.value = true
 
 
-
-                val result = uploadImages(images, baner, email)
-                images.clear()
-                shouldShowPopup.value = false
+//                val result = uploadImages(images, baner, email)
+//                images.clear()
+//                shouldShowPopup.value = false
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -302,14 +301,20 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun uriToBitmapAppViewModel(parcelFileDescriptor: ParcelFileDescriptor): Bitmap? {
+    fun onPopupPressPdf(baner: Int) {
+        viewModelScope.launch {
+            uploadImages(images, baner, "")
 
-        val fileDescriptor: FileDescriptor = parcelFileDescriptor.fileDescriptor
-        val image = BitmapFactory.decodeFileDescriptor(fileDescriptor)
-        parcelFileDescriptor.close()
-        return image
+            images.clear()
+            shouldShowPopup.value = false
+        }
+    }
 
-        return null
+    fun onPopupPressEmail(baner: Int, email: String) {
+        uploadImages(images, baner, email)
+
+        images.clear()
+        shouldShowPopup.value = false
     }
 
     private fun uploadImages(images: List<File>, baner: Int, email: String) {
