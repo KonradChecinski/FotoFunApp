@@ -43,6 +43,8 @@ class AppViewModel @Inject constructor(
 
     val applicationContext = FotoFun.applicationContext()
 
+    var email: MutableState<String> = mutableStateOf("")
+
     val settings = repository.getSettingsFlow()
     val settingsLiveData = repository.getSettings()
     var checkIfSettingsEmpty: Boolean = false
@@ -130,7 +132,6 @@ class AppViewModel @Inject constructor(
                                     settingValue = 1
                                 )
                             )
-
 //                        repository.deleteTable()
                         }
                     }
@@ -309,7 +310,6 @@ class AppViewModel @Inject constructor(
             shouldShowPopup.value = false
         }
     }
-
     fun onPopupPressEmail(baner: Int, email: String) {
         uploadImages(images, baner, email)
 
@@ -327,6 +327,10 @@ class AppViewModel @Inject constructor(
 //            Log.i("gromzi", result?.code().toString())
 //            Log.i("gromzi", result?.body()?.result.toString())
         }
+    }
+
+    fun updateEmail(input: String) {
+        email.value = input
     }
 
 }

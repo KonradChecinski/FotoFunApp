@@ -187,7 +187,12 @@ fun AppView(
                     }
                     Button(
                         modifier = Modifier.size(150.dp, 80.dp).padding(5.dp, 10.dp),
-                        onClick = { viewModel.shouldShowPopup.value = false }
+                        onClick = {
+                            viewModel.onPopupPressEmail(
+                                baner = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toInt() else 1,
+                                email = viewModel.email.toString()
+                            )
+                        }
                     ) {
                         Text(text = "Wyślij na maila")
                     }

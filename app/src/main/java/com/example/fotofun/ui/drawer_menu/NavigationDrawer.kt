@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -15,8 +17,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -37,11 +42,14 @@ fun DrawerHeader() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DrawerBody(
     modifier: Modifier = Modifier,
     viewModel: AppViewModel = hiltViewModel()
 ) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val suggestionsHowManyPhotos = listOf("4", "5", "6")
     val suggestionsDelay = listOf("1", "2", "3", "4", "5")
@@ -49,7 +57,24 @@ fun DrawerBody(
 
     val settings = viewModel.settings.collectAsState(initial = emptyList())
 
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp, 0.dp, 20.dp, 50.dp)
+    ) {
+        Text(text = "Email")
+        TextField(
+            value = viewModel.email.value,
+            onValueChange = { viewModel.updateEmail(it) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }
+            )
+        )
+    }
 
     Dropdown(
         suggestions = suggestionsHowManyPhotos,
@@ -68,7 +93,6 @@ fun DrawerBody(
         labelParam = "Baner",
         valueParam = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toString() else ""
     )
-
 }
 
 @Composable
