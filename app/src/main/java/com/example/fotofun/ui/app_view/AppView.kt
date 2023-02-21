@@ -11,6 +11,7 @@ import android.os.ParcelFileDescriptor
 import android.system.Os.mkdir
 import android.util.Log
 import android.util.Rational
+import android.view.Surface.ROTATION_90
 import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -111,9 +112,9 @@ fun AppView(
                             onImageCaptured = viewModel::handleImageCapture,
                             onError = { Log.e("kilo", "View error:", it) },
 
-                            howMany = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toInt() else 5,
-                            delayMilliseconds = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue else 3000,
-                            baner = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toInt() else 1,
+                            howMany = if(!settings.value.isNullOrEmpty() && settings.value.size >=1) settings.value[0].settingValue.toInt() else 5,
+                            delayMilliseconds = if(!settings.value.isNullOrEmpty() && settings.value.size >=2) settings.value[1].settingValue else 3000,
+                            baner = if(!settings.value.isNullOrEmpty() && settings.value.size >=3) settings.value[2].settingValue.toInt() else 1,
                             email = ""
                         )
                     )
@@ -188,9 +189,9 @@ fun AppView(
                     Button(
                         modifier = Modifier.size(150.dp, 80.dp).padding(5.dp, 10.dp),
                         onClick = {
+                            Log.d("gromzi mail", viewModel.email.value)
                             viewModel.onPopupPressEmail(
                                 baner = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toInt() else 1,
-                                email = viewModel.email.toString()
                             )
                         }
                     ) {

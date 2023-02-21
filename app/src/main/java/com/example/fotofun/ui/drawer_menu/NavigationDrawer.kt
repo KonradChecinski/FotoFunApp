@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,8 +66,8 @@ fun DrawerBody(
         Text(text = "Email")
         TextField(
             value = viewModel.email.value,
-            onValueChange = { viewModel.updateEmail(it) },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            onValueChange = { viewModel.onEvent(AppViewEvent.OnUpdateEmail(it)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email ,imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
                 onDone = {
                     focusManager.clearFocus()
@@ -79,19 +80,19 @@ fun DrawerBody(
     Dropdown(
         suggestions = suggestionsHowManyPhotos,
         labelParam = "Ilość zdjęć",
-        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[0].settingValue.toString() else ""
+        valueParam = if(!settings.value.isNullOrEmpty() && settings.value.size >=1) settings.value[0].settingValue.toString() else ""
     )
 
     Dropdown(
         suggestions = suggestionsDelay,
         labelParam = "Opóźnienie (sekundy)",
-        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[1].settingValue.toString().slice(listOf(0)) else ""
+        valueParam = if(!settings.value.isNullOrEmpty() && settings.value.size >=2) settings.value[1].settingValue.toString().slice(listOf(0)) else ""
     )
 
     Dropdown(
         suggestions = suggestionsBanner,
         labelParam = "Baner",
-        valueParam = if(!settings.value.isNullOrEmpty()) settings.value[2].settingValue.toString() else ""
+        valueParam = if(!settings.value.isNullOrEmpty() && settings.value.size >=3) settings.value[2].settingValue.toString() else ""
     )
 }
 

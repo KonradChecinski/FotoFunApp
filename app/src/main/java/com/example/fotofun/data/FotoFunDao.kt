@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.fotofun.data.entities.Course
+import com.example.fotofun.data.entities.Email
 import com.example.fotofun.data.entities.Setting
 import kotlinx.coroutines.flow.Flow
 
@@ -35,4 +36,11 @@ interface FotoFunDao {
 
     @Query("DELETE FROM Setting")
     suspend fun deleteTable()
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addEmail(email: Email)
+
+    @Query("SELECT * FROM Email WHERE emailId = :emailId")
+    suspend fun getEmailById(emailId: Int): Email?
 }

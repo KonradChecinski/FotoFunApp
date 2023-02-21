@@ -8,10 +8,29 @@ data class SimpleJSONResponse(
 var status: Boolean?,
 
 @SerializedName("result")
-var result: String?,
+var result: FotoPaper?,
 
 @SerializedName("message")
 var message: String?,
 
 
+)
+
+
+data class FotoPaper(
+    @SerializedName("id")
+    var id: String?,
+
+    @SerializedName("pdf")
+    var pdf: String?,
+
+    @SerializedName("images")
+    var images: List<String>,
+
+
+
+    @SerializedName("updated_at")
+    var updated_at: String?,
+    @SerializedName("created_at")
+    var created_at: String?,
 )

@@ -2,10 +2,11 @@ package com.example.fotofun.ui.app_view
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.media.MediaActionSound
-import android.media.RingtoneManager
 import android.net.Uri
-import android.os.ParcelFileDescriptor
+import android.os.Environment
 import android.util.Log
 import androidx.camera.core.AspectRatio.RATIO_4_3
 import androidx.camera.core.CameraSelector
@@ -19,7 +20,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fotofun.FotoFun
 import com.example.fotofun.data.FotoFunRepository
+import com.example.fotofun.data.entities.Email
 import com.example.fotofun.data.entities.Setting
+import com.example.fotofun.di.AndroidDownloader
 import com.example.fotofun.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -27,8 +30,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.File
-import java.io.FileDescriptor
+import okhttp3.ResponseBody
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
@@ -69,18 +72,12 @@ class AppViewModel @Inject constructor(
 
 
     init {
-//        val settingId = savedStateHandle.get<Int>("settingId")
+            viewModelScope.launch {
+                repository.getEmailById(1)?.let { emailSet ->
+                    email.value = emailSet.settingValue
+                }
+            }
 
-//        if(settingId != null) {
-//            viewModelScope.launch {
-//                repository.getSettingById(settingId)?.let { setting ->
-//                    settingName = setting.settingName
-//                    settingValue = setting.settingValue
-//
-//                    this@AppViewModel.setting = setting
-//                }
-//            }
-//        }
     }
 
 
@@ -132,6 +129,13 @@ class AppViewModel @Inject constructor(
                                     settingValue = 1
                                 )
                             )
+                            repository.addEmail(
+                                email = Email(
+                                    emailId = 1,
+                                    settingName = "email",
+                                    settingValue = ""
+                                )
+                            )
 //                        repository.deleteTable()
                         }
                     }
@@ -171,6 +175,19 @@ class AppViewModel @Inject constructor(
                         setting = Setting(
                             settingId = 3,
                             settingName = "banner",
+                            settingValue = event.settingValue
+                        )
+                    )
+                }
+            }
+
+            is AppViewEvent.OnUpdateEmail -> {
+                    email.value = event.settingValue
+                viewModelScope.launch {
+                    repository.addEmail(
+                        email = Email(
+                            emailId = 1,
+                            settingName = "email",
                             settingValue = event.settingValue
                         )
                     )
@@ -251,6 +268,9 @@ class AppViewModel @Inject constructor(
 
                 if(i <= howMany - 1) {
 
+
+
+
                     val photoFile = File(
                         outputDirectory,
                         SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
@@ -265,7 +285,43 @@ class AppViewModel @Inject constructor(
                         }
 
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+
+                            val ei = ExifInterface(photoFile.absolutePath)
+                            val orientation: Int = ei.getAttributeInt(
+                                ExifInterface.TAG_ORIENTATION,
+                                ExifInterface.ORIENTATION_UNDEFINED
+                            )
+                            val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+
+                            var rotatedBitmap: Bitmap? = null
+                            when (orientation) {
+                                ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap =
+                                    rotateImage(bitmap, 90F)
+                                ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap =
+                                    rotateImage(bitmap, 180F)
+                                ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap =
+                                    rotateImage(bitmap, 270F)
+                                ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+                                else -> rotatedBitmap = bitmap
+                            }
+
+                            var fOut: FileOutputStream
+                            try {
+                                fOut = FileOutputStream(photoFile.absolutePath)
+                                rotatedBitmap!!.compress(Bitmap.CompressFormat.JPEG, 85, fOut)
+                                fOut.flush()
+                                fOut.close()
+                            } catch (e1: FileNotFoundException) {
+                                // TODO Auto-generated catch block
+                                e1.printStackTrace()
+                            } catch (e: IOException) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace()
+                            }
+
+
                             val savedUri = Uri.fromFile(photoFile)
+
                             images.add(photoFile)
                             onImageCaptured(savedUri)
                         }
@@ -291,11 +347,6 @@ class AppViewModel @Inject constructor(
 
                 shouldShowPopup.value = true
 
-
-//                val result = uploadImages(images, baner, email)
-//                images.clear()
-//                shouldShowPopup.value = false
-
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -303,34 +354,45 @@ class AppViewModel @Inject constructor(
     }
 
     fun onPopupPressPdf(baner: Int) {
-        viewModelScope.launch {
             uploadImages(images, baner, "")
 
             images.clear()
             shouldShowPopup.value = false
-        }
-    }
-    fun onPopupPressEmail(baner: Int, email: String) {
-        uploadImages(images, baner, email)
 
-        images.clear()
-        shouldShowPopup.value = false
+    }
+    fun onPopupPressEmail(baner: Int) {
+        viewModelScope.launch {
+            val email = repository.getEmailById(1);
+
+            uploadImages(images, baner, email!!.settingValue)
+            Log.d("gromzi mail", email.settingValue)
+
+            images.clear()
+            shouldShowPopup.value = false
+        }
+
     }
 
     private fun uploadImages(images: List<File>, baner: Int, email: String) {
         viewModelScope.launch {
-            val result = repository.uploadImages(images, baner, email)
 
-//            Log.i("gromzi", "oddało")
-//            Log.i("gromzi", result?.raw().toString())
-//
-//            Log.i("gromzi", result?.code().toString())
-//            Log.i("gromzi", result?.body()?.result.toString())
+            val result = repository.uploadImages(images, baner, email)
+            if(email == ""){
+                val downloader = AndroidDownloader(applicationContext)
+                downloader.downloadFile("http://dom.webitup.pl/storage/${result!!.result!!.pdf!!}")
+            }
+
+
         }
     }
 
-    fun updateEmail(input: String) {
-        email.value = input
-    }
 
+    fun rotateImage(source: Bitmap, angle: Float): Bitmap? {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
+    }
 }

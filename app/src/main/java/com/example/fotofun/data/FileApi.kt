@@ -16,9 +16,7 @@ interface FileApi {
     suspend fun uploadImages(
         @Header("Authorization") token: String,
         @Body body: RequestBody
-    ) : Call<ResponseBody>
-
-
+    ) : SimpleJSONResponse
 
     companion object {
         val instance by lazy {

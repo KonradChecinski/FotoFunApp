@@ -28,6 +28,7 @@ sealed class AppViewEvent {
     data class OnSetPhotosQuantity(val settingValue: Long): AppViewEvent()
     data class OnSetDelay(val settingValue: Long): AppViewEvent()
     data class OnSetBanner(val settingValue: Long): AppViewEvent()
+    data class OnUpdateEmail(val settingValue: String): AppViewEvent()
 
     data class OnGetSettingValue(val settingName: String): AppViewEvent()
 }
