@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.fotofun.data.entities.Course
 import com.example.fotofun.data.entities.Email
 import com.example.fotofun.data.entities.Setting
 import kotlinx.coroutines.flow.Flow

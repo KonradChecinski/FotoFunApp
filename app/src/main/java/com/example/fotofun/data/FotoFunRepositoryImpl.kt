@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import com.example.fotofun.data.entities.Email
 import com.example.fotofun.data.entities.Setting
 import com.example.fotofun.data.entities.SimpleJSONResponse
+import com.example.fotofun.di.FileApi
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody

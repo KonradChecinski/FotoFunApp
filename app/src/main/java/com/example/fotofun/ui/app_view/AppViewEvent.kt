@@ -3,8 +3,6 @@ package com.example.fotofun.ui.app_view
 import android.net.Uri
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
-import com.example.fotofun.data.entities.Setting
-import com.example.fotofun.ui.camera_view.CameraViewEvent
 import java.io.File
 import java.util.concurrent.Executor
 

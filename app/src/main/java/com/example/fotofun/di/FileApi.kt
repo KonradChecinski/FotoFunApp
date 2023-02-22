@@ -1,14 +1,10 @@
-package com.example.fotofun.data
+package com.example.fotofun.di
 
-import androidx.annotation.StringRes
 import com.example.fotofun.data.entities.SimpleJSONResponse
 import okhttp3.*
-import retrofit2.Call
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
-import java.io.IOException
 
 interface FileApi {
 
